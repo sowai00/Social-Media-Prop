@@ -4,10 +4,10 @@ import { put } from '@vercel/blob';
 export async function POST(req: NextRequest) {
   try {
     const { text, imageBase64 } = await req.json();
-    const accessToken = process.env.META_ACCESS_TOKEN;
+    const accessToken = process.env.THREADS_ACCESS_TOKEN;
 
     if (!accessToken) {
-      return NextResponse.json({ error: '請先在 .env.local 設定 META_ACCESS_TOKEN' }, { status: 400 });
+      return NextResponse.json({ error: '請先在 .env.local 設定 THREADS_ACCESS_TOKEN' }, { status: 400 });
     }
 
     if (!process.env.BLOB_READ_WRITE_TOKEN) {

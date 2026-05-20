@@ -41,7 +41,7 @@ export default function Dashboard() {
     const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
     if (!appId) { alert('請設定 NEXT_PUBLIC_FACEBOOK_APP_ID'); return; }
     const redirectUri = encodeURIComponent('http://localhost:3000/api/auth/meta/callback');
-    // 強化版 Scopes
+    // 強化版 Scopes (加入 pages_manage_posts 用作發文)
     const scopes = [
       'public_profile',
       'email',
@@ -49,18 +49,19 @@ export default function Dashboard() {
       'instagram_content_publish',
       'pages_show_list',
       'pages_read_engagement',
+      'pages_manage_posts',
       'business_management'
     ].join(',');
-    const url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
+    const url = `https://www.facebook.com/v19.0/dialog/oauth?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=meta`;
     window.open(url, '_blank', 'width=600,height=700');
   };
 
   const connectThreads = () => {
-    const appId = process.env.NEXT_PUBLIC_FACEBOOK_APP_ID;
-    if (!appId) { alert('請設定 NEXT_PUBLIC_FACEBOOK_APP_ID'); return; }
-    const redirectUri = encodeURIComponent('http://localhost:3000/api/auth/meta/callback');
+    const appId = process.env.NEXT_PUBLIC_THREADS_APP_ID;
+    if (!appId) { alert('請設定 NEXT_PUBLIC_THREADS_APP_ID'); return; }
+    const redirectUri = encodeURIComponent('https://localhost:3000/api/auth/meta/callback');
     const scopes = ['threads_basic', 'threads_content_publish'].join(',');
-    const url = `https://www.threads.net/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code`;
+    const url = `https://threads.net/oauth/authorize?client_id=${appId}&redirect_uri=${redirectUri}&scope=${scopes}&response_type=code&state=threads`;
     window.open(url, '_blank', 'width=600,height=700');
   };
 
@@ -225,8 +226,14 @@ export default function Dashboard() {
                            </div>
                         </div>
                         <h4 className="text-xl font-black text-white mb-4 italic">{p.name}</h4>
-                        <div className="flex-1 bg-slate-950/50 rounded-3xl p-6 text-sm text-slate-400 leading-relaxed border border-slate-800/50 overflow-y-auto custom-scrollbar relative">
-                          {generatedCaptions[p.id] || (isGenerating && currentGeneratingId === p.id ? 'Thinking...' : 'Standby...')}
+                        <div className="flex-1 relative flex flex-col min-h-0">
+                          <textarea
+                            value={generatedCaptions[p.id] || ''}
+                            onChange={(e) => setGeneratedCaptions(prev => ({ ...prev, [p.id]: e.target.value }))}
+                            placeholder={isGenerating && currentGeneratingId === p.id ? 'Thinking...' : 'Standby...'}
+                            className="flex-1 w-full bg-slate-950/50 rounded-3xl p-6 text-sm text-slate-400 leading-relaxed border border-slate-800/50 resize-none focus:outline-none focus:border-indigo-500/50 custom-scrollbar"
+                            disabled={isGenerating && currentGeneratingId === p.id}
+                          />
                           {generatedCaptions[p.id] && (
                             <button onClick={() => { navigator.clipboard.writeText(generatedCaptions[p.id]); alert('Copied!'); }} className="absolute bottom-4 right-4 p-2 bg-slate-800 rounded-xl"><Copy size={14} /></button>
                           )}
